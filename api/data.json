@@ -1,0 +1,174 @@
+[
+    {
+        "id": 105969,
+        "common_name": "Cactus",
+        "slug": "rhipsalis-oblonga",
+        "scientific_name": "Rhipsalis oblonga",
+        "year": 1918,
+        "bibliography": "Arch. Jard. Bot. Rio de Janeiro 2: 36 (1918)",
+        "author": "Loefgr.",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 5293,
+        "image_url": "https://bs.plantnet.org/image/o/47d4f01e2bc2c2db602fce38f864a40309f5f293",
+        "synonyms": [
+            "Rhipsalis crispimarginata"
+        ],
+        "genus": "Rhipsalis",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/rhipsalis-oblonga",
+            "plant": "/api/v1/plants/rhipsalis-oblonga",
+            "genus": "/api/v1/genus/rhipsalis"
+        }
+    },
+    {
+        "id": 175574,
+        "common_name": "Cactus",
+        "slug": "disocactus-phyllanthoides",
+        "scientific_name": "Disocactus phyllanthoides",
+        "year": 1991,
+        "bibliography": "Bradleya 9: 88 (1991)",
+        "author": "(DC.) Barthlott",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 7151,
+        "image_url": "https://bs.plantnet.org/image/o/846972eb3323b1ba6669e7b9ffb1f920be68dc97",
+        "synonyms": [
+            "Heliocereus phyllanthoides",
+            "Epiphyllum phyllanthoides",
+            "Phyllocactus plukenetii",
+            "Cereus phyllanthoides var. curtisii",
+            "Cereus phyllanthoides var. vandesii",
+            "Cereus phyllanthoides var. albiflorus",
+            "Cactus phyllanthoides",
+            "Cereus phyllanthoides var. quillardieri",
+            "Nopalxochia phyllanthoides",
+            "Phyllocactus phyllanthoides",
+            "Opuntia speciosa",
+            "Cereus phyllanthoides",
+            "Cereus phyllanthoides var. jenkinsonii",
+            "Phyllocactus jenkinsonii"
+        ],
+        "genus": "Disocactus",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/disocactus-phyllanthoides",
+            "plant": "/api/v1/plants/disocactus-phyllanthoides",
+            "genus": "/api/v1/genus/disocactus"
+        }
+    },
+    {
+        "id": 182300,
+        "common_name": "Cactus",
+        "slug": "eriosyce-senilis",
+        "scientific_name": "Eriosyce senilis",
+        "year": 1994,
+        "bibliography": "Eriosyce (Cactac.) Gen. Revis. Ampl.: 119 (1994)",
+        "author": "(Backeb.) Katt.",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 7006,
+        "image_url": "https://bs.plantnet.org/image/o/12270420527b9eaa74db401816d01bba04d5e748",
+        "synonyms": [
+            "Echinocactus senilis",
+            "Neoporteria gerocephala",
+            "Neoporteria nidus var. multicolor",
+            "Neoporteria nidus var. matancillana",
+            "Neoporteria multicolor",
+            "Neoporteria nidus var. gerocephala",
+            "Chilenia thiebautiana",
+            "Neoporteria nidus f. senilis",
+            "Neoporteria senilis",
+            "Neoporteria thiebautiana"
+        ],
+        "genus": "Eriosyce",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/eriosyce-senilis",
+            "plant": "/api/v1/plants/eriosyce-senilis",
+            "genus": "/api/v1/genus/eriosyce"
+        }
+    },
+    {
+        "id": 191789,
+        "common_name": "Cactus",
+        "slug": "gymnocalycium-oenanthemum",
+        "scientific_name": "Gymnocalycium oenanthemum",
+        "year": 1934,
+        "bibliography": "Kaktus\u00e1r 5: 2 (1934)",
+        "author": "Backeb.",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 7030,
+        "image_url": "https://bs.plantnet.org/image/o/3df84f7cd85d82ecde7561365d2a3171c94a7d39",
+        "synonyms": [
+            "Gymnocalycium oenanthemum var. tillianum",
+            "Gymnocalycium oenanthemum var. montanum",
+            "Gymnocalycium tillianum",
+            "Gymnocalycium carminanthum",
+            "Gymnocalycium carminanthum var. montanum",
+            "Gymnocalycium oenanthemum subsp. carminanthum",
+            "Gymnocalycium tillianum subsp. montanum"
+        ],
+        "genus": "Gymnocalycium",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/gymnocalycium-oenanthemum",
+            "plant": "/api/v1/plants/gymnocalycium-oenanthemum",
+            "genus": "/api/v1/genus/gymnocalycium"
+        }
+    },
+    {
+        "id": 191772,
+        "common_name": "Cactus",
+        "slug": "gymnocalycium-horstii",
+        "scientific_name": "Gymnocalycium horstii",
+        "year": 1970,
+        "bibliography": "Kakteen And. Sukk. 21: 162 (1970)",
+        "author": "Buining",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 7030,
+        "image_url": "https://bs.plantnet.org/image/o/9910595c8d9036f652ebcecce27daae90b643ad7",
+        "synonyms": [],
+        "genus": "Gymnocalycium",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/gymnocalycium-horstii",
+            "plant": "/api/v1/plants/gymnocalycium-horstii",
+            "genus": "/api/v1/genus/gymnocalycium"
+        }
+    },
+    {
+        "id": 351126,
+        "common_name": "Cactus",
+        "slug": "matucana-paucicostata",
+        "scientific_name": "Matucana paucicostata",
+        "year": 1963,
+        "bibliography": "Taxon 12: 124 (1963)",
+        "author": "F.Ritter",
+        "status": "accepted",
+        "rank": "species",
+        "family_common_name": null,
+        "genus_id": 14850,
+        "image_url": "https://bs.plantnet.org/image/o/957265d1888eb1049088c6a2c560db44ad47a6e6",
+        "synonyms": [
+            "Submatucana paucicostata",
+            "Borzicactus paucicostatus f. robustispinus",
+            "Borzicactus paucicostatus"
+        ],
+        "genus": "Matucana",
+        "family": "Cactaceae",
+        "links": {
+            "self": "/api/v1/species/matucana-paucicostata",
+            "plant": "/api/v1/plants/matucana-paucicostata",
+            "genus": "/api/v1/genus/matucana"
+        }
+    }
+]
