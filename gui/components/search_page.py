@@ -64,7 +64,7 @@ class SearchPage(ctk.CTkFrame):
         self.scrollbar.pack(side="right", fill="y")
 
         self.results_frame = ctk.CTkFrame(self.results_canvas, corner_radius=10, fg_color="#FFFFFF")
-        self.results_frame_id = self.results_canvas.create_window((0, 0), window=self.results_frame, anchor="nw")
+        self.results_frame_id = self.results_canvas.create_window((0, 0), window=self.results_frame, anchor="center")
 
         # Bind canvas for dynamic resizing
         self.results_frame.bind(
