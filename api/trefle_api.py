@@ -55,73 +55,91 @@ def fetch_plants(filter_key=None, filter_value=None):
             break  # Exit on error
 
     return all_plants
+
+
+import requests
+
 def fetch_plant_care_details(plant_name):
-    url = f"{BASE_URL}/plants"
-    params = {"page": 1}
-    all_plants = []
+    """
+    Fetch plant care details using the provided plant name (common or scientific name).
+    It fetches the plant details and care information based on the name.
+
+    Args:
+        plant_name (str): The name of the plant to fetch care details for (common or scientific name).
+
+    Returns:
+        dict: A dictionary containing care details for the plant (light, pH range, temperature range, etc.)
+              or None if no plant was found.
+    """
+    API_KEY = "-d9grLMzpYCFjJplOQLjR3rGjkEBLtBSPpY2WA55RiY"  # Your Trefle API key
+    BASE_URL = "https://trefle.io/api/v1"
+    HEADERS = {
+        "Authorization": f"Bearer {API_KEY}"
+    }
+
+    url = f"{BASE_URL}/species"
+    params = {"filter[common_name]": plant_name.lower()}  # Search by common name
 
     try:
-        # Fetch all pages of plant data
-        while True:
-            print(f"Fetching page {params['page']}...")
-            response = requests.get(url, headers=HEADERS, params=params)
-            response.raise_for_status()
-            data = response.json()
-
-            if "data" in data and data["data"]:
-                all_plants.extend(data["data"])
-                print(f"Number of plants fetched on page {params['page']}: {len(data['data'])}")
-            else:
-                print(f"No data found on page {params['page']}.")
-                break
-
-            # Check if there is a next page
-            if not data.get("links", {}).get("next"):
-                break
-            params["page"] += 1
-
-        print(f"Total plants fetched: {len(all_plants)}")
-
-        # Find the plant by name
-        matching_plants = [
-            plant for plant in all_plants if plant_name.lower() in (plant.get("common_name") or "").lower()
-        ]
-        if not matching_plants:
-            print(f"No matching plants found for: {plant_name}")
-            return None
-
-        # Fetch detailed data for the first matching plant
-        plant_link = matching_plants[0].get("links", {}).get("self")
-        if not plant_link:
-            print(f"No detailed link found for: {plant_name}")
-            return None
-
-        response = requests.get(plant_link, headers=HEADERS)
+        # Search for the plant by common name
+        response = requests.get(url, headers=HEADERS, params=params)
         response.raise_for_status()
-        plant_details = response.json()
+        data = response.json()
 
-        # Extract key growth information
-        growth = plant_details.get("data", {}).get("main_species", {}).get("growth", {})
-        if not growth:
-            print(f"No growth details found for: {plant_name}")
+        if "data" not in data or not data["data"]:
+            print(f"No data found for plant: {plant_name}")
             return None
 
-        care_details = {
-            "light": growth.get("light"),  # Light requirement (scale 0-10)
-            "ph_range": (growth.get("ph_minimum"), growth.get("ph_maximum")),  # Soil pH range
-            "temperature_range": (
-                growth.get("minimum_temperature", {}).get("celsius"),
-                growth.get("maximum_temperature", {}).get("celsius"),
-            ),  # Min and max temperature
-            "soil_humidity": growth.get("soil_humidity"),  # Soil moisture (scale 0-10)
-            "description": growth.get("description"),  # Growth description
-        }
+        # If data is found, extract the slug for more detailed information
+        plant = data["data"][0]  # Assuming the first result is the correct one
+        species_slug = plant.get("slug")
 
-        return care_details
+        if species_slug:
+            species_url = f"{BASE_URL}/species/{species_slug}"
+            species_response = requests.get(species_url, headers=HEADERS)
+            species_response.raise_for_status()
+            species_data = species_response.json()
+
+            # Extract care details from the response
+            if "data" in species_data and species_data["data"]:
+                plant_data = species_data["data"]
+                care_details = {
+                    "light": plant_data.get("growth", {}).get("light"),
+                    "humidity": plant_data.get("growth", {}).get("atmospheric_humidity"),
+                    "temperature": plant_data.get("growth", {}).get("temperature"),
+                    "soil_type": plant_data.get("growth", {}).get("soil_type"),
+                    "ph_maximum": plant_data.get("growth", {}).get("ph_maximum"),
+                    "ph_minimum": plant_data.get("growth", {}).get("ph_minimum"),
+                    "growth_rate": plant_data.get("specifications", {}).get("growth_rate"),
+                    "growth_form": plant_data.get("specifications", {}).get("growth_form"),
+                    "growth_habit": plant_data.get("specifications", {}).get("growth_habit"),
+                    "average_height": plant_data.get("specifications", {}).get("average_height"),
+                    "maximum_height": plant_data.get("specifications", {}).get("maximum_height"),
+                    "description": plant_data.get("description"),
+                    "fruit_or_seed": plant_data.get("fruit_or_seed"),
+                    # New fields for flower
+                    "flower_color": plant_data.get("flower", {}).get("color"),
+                    "flower_conspicuous": plant_data.get("flower", {}).get("conspicuous"),
+                    # New fields for foliage
+                    "foliage_texture": plant_data.get("foliage", {}).get("texture"),
+                    "foliage_color": plant_data.get("foliage", {}).get("color"),
+                    "leaf_retention": plant_data.get("foliage", {}).get("leaf_retention")
+                }
+
+                return care_details  # Return care details dictionary
+
+            else:
+                print("No care details found for the plant.")
+                return None
+        else:
+            print("No plant details found for the given name.")
+            return None
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching plant care details: {e}")
         return None
+
+
 
 
 def fetch_plant_care_details_new_plant(plant_name_or_scientific=None, family_name=None):

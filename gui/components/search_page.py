@@ -149,7 +149,7 @@ class SearchPage(ctk.CTkFrame):
         """Fetch and process an image from a URL."""
         try:
             image = Image.open(requests.get(image_url, stream=True).raw)
-            image.thumbnail((300, 300))
+            image.thumbnail((400, 350))
             return ImageTk.PhotoImage(image)
         except Exception as e:
             print(f"Error fetching image: {e}")

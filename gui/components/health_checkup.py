@@ -15,7 +15,7 @@ class HealthCheckupPage(ctk.CTkFrame):
 
         # Title
         self.title_label = ctk.CTkLabel(
-            self.content_frame, text="Health Checkup", font=("Arial", 32, "bold"),
+            self.content_frame, text="🩺Health Checkup", font=("Arial", 32, "bold"),
             text_color="#0B3D26"
         )
         self.title_label.pack(pady=30)
@@ -109,28 +109,102 @@ class HealthCheckupPage(ctk.CTkFrame):
             watering (str): User-provided watering status.
 
         Returns:
-            str: Health status message.
+            str: Health status message with feedback on both sunlight and watering.
         """
         health_issues = []
+        health_message = ""
 
-        # Evaluate sunlight exposure
-        recommended_light = care_details.get("light")  # Assume API provides light as an integer scale
+        # Extract care details from API response
+        recommended_light = care_details.get("light")  # Sunlight requirement as an integer (scale 0-10)
+        recommended_humidity = care_details.get("soil_humidity")  # Soil moisture requirement as an integer (scale 0-10)
+
+        # Care Message with relevant details
+        care_message = "\n\nPlant Care Details:\n\n"
+        if 'light' in care_details:
+            light_level = care_details['light']
+            light_description = (
+                "very low light" if light_level <= 10 else
+                "low light" if 10 < light_level <= 20 else
+                "medium-low light" if 50 < light_level <= 200 else
+                "medium light" if 200 < light_level <= 500 else
+                "medium-bright light" if 500 < light_level <= 1000 else
+                "bright light")
+            care_message += f"☀️ Sunlight: This plant needs {light_description}.\n"
+
+        if 'humidity' in care_details:
+            care_message += f"💧 Humidity: Around {care_details['humidity']}%.\n"
+
+        if 'growth_rate' in care_details:
+            care_message += f"📈 Growth rate: {care_details['growth_rate']} rate.\n"
+
+        if 'minimum_temperature' in care_details and 'maximum_temperature' in care_details:
+            care_message += f"🌡️ Temperature: {care_details['minimum_temperature']}°C to {care_details['maximum_temperature']}°C.\n"
+
+        if 'soil_type' in care_details:
+            care_message += f"🌿 Soil Type: {care_details['soil_type']} soil.\n"
+
+        if 'ph_minimum' in care_details and 'ph_maximum' in care_details:
+            care_message += f"🧑‍🌾 Soil pH: {care_details['ph_minimum']} to {care_details['ph_maximum']}.\n"
+
+        care_message += "💦 Watering: Water regularly, ensuring soil doesn't become soggy.\n"
+
+        # Sunlight evaluation
+        sunlight_map = {
+            "Full Sun (6+ hours daily)": 15,
+            "Partial Sun (4-6 hours daily)": 13,
+            "Partial Shade (2-4 hours daily)": 8,
+            "Full Shade (Less than 2 hours daily)": 1,
+        }
+
+        sunlight_value = sunlight_map.get(sunlight, 0)
         if recommended_light:
-            if "Full Sun" in sunlight and recommended_light < 7:
-                health_issues.append("This plant may be getting too much sunlight.")
-            elif "Shade" in sunlight and recommended_light > 3:
-                health_issues.append("This plant may need more sunlight.")
+            if sunlight_value < recommended_light:
+                health_issues.append(
+                    f"This plant needs more sunlight. It is currently receiving {sunlight.lower()}. Try increasing that by 1-2 hours.")
+            elif sunlight_value > recommended_light:
+                health_issues.append(
+                    f"This plant is getting too much sunlight. It is currently receiving {sunlight.lower()}. Try reducing that by 1-2 hours.")
+            else:
+                health_message += f"The sunlight is appropriate for this plant. It is currently receiving {sunlight.lower()}. "
 
-        # Evaluate watering status
-        recommended_water = care_details.get("precipitation_min")  # Example field
-        if recommended_water:
-            if "Saturated" in watering:
-                health_issues.append("Soil is too wet; reduce watering.")
-            elif "Dry" in watering or "Very Dry" in watering:
-                health_issues.append("Plant may need more water.")
+        # Watering evaluation
+        watering_map = {
+            "Saturated (Too much water, soil is soggy)": 9,
+            "Optimal (Soil is moist but not soggy)": 6,
+            "Dry (Soil is dry, needs watering)": 3,
+            "Very Dry (Plant is wilting, urgent watering needed)": 1,
+        }
 
-        # Determine overall health
+        watering_value = watering_map.get(watering, 0)
+
+        # Overwatering check (Saturated condition)
+        if watering_value == 9:
+            health_issues.append(
+                f"Your plant is being overwatered; reduce watering. The soil is currently {watering.lower()}.")
+        # Underwatering check (Very Dry or Dry condition)
+        elif watering_value == 1 or watering_value == 3:
+            health_issues.append(
+                f"Your plant needs more water. The soil is currently {watering.lower()}.")
+        # Appropriate watering check
+        elif watering_value == 6:
+            health_message += f"The watering is appropriate for this plant. It is currently being watered as {watering.lower()}. "
+
+        # If the recommended humidity is available, perform additional checks
+        if recommended_humidity is not None:
+            if watering_value < recommended_humidity:
+                health_issues.append(
+                    f"Your plant needs more water. It is currently being watered as {watering.lower()}.")
+            elif watering_value > recommended_humidity:
+                health_issues.append(
+                    f"Your plant is being overwatered; reduce watering. It is currently being watered as {watering.lower()}.")
+
+        # Combine health issues and overall message
         if not health_issues:
-            return "The plant appears healthy based on the provided conditions."
+
+            health_message += "The plant appears healthy based on the provided conditions."
+
+        # Combine health message and issues into the final output
+        if health_issues:
+            return "\n".join(health_issues) + care_message
         else:
-            return "\n".join(health_issues)
+            return health_message + care_message

@@ -193,125 +193,227 @@ BASE_URL = "https://trefle.io/api/v1"
 API_KEY = '-d9grLMzpYCFjJplOQLjR3rGjkEBLtBSPpY2WA55RiY'
 HEADERS = {"Authorization": f"Bearer {API_KEY}"}
 
+import requests
 
-def fetch_plant_slug(plant_name):
+def fetch_plant_care_details(plant_name):
     """
-    Search for a plant by its name (common name or scientific name) and fetch its slug.
+    Fetch plant care details using the provided plant name (common or scientific name).
+    It fetches the plant details and care information based on the name.
+
+    Args:
+        plant_name (str): The name of the plant to fetch care details for (common or scientific name).
+
+    Returns:
+        dict: A dictionary containing care details for the plant (light, pH range, temperature range, etc.)
+              or None if no plant was found.
     """
+    API_KEY = "-d9grLMzpYCFjJplOQLjR3rGjkEBLtBSPpY2WA55RiY"  # Your Trefle API key
+    BASE_URL = "https://trefle.io/api/v1"
+    HEADERS = {
+        "Authorization": f"Bearer {API_KEY}"
+    }
+
     url = f"{BASE_URL}/species"
-    params = {"filter[common_name]": plant_name}
+    params = {"filter[common_name]": plant_name.lower()}  # Search by common name
 
     try:
-        # Make API request to search for the plant by its common name
+        # Search for the plant by common name
         response = requests.get(url, headers=HEADERS, params=params)
         response.raise_for_status()
         data = response.json()
 
-        # Check if there is any data in the response
-        if "data" in data and data["data"]:
-            plant = data["data"][0]  # Assuming the first result is the correct one
-            species_slug = plant.get("slug")
-            return species_slug
+        if "data" not in data or not data["data"]:
+            print(f"No data found for plant: {plant_name}")
+            return None
+
+        # If data is found, extract the slug for more detailed information
+        plant = data["data"][0]  # Assuming the first result is the correct one
+        species_slug = plant.get("slug")
+
+        if species_slug:
+            species_url = f"{BASE_URL}/species/{species_slug}"
+            species_response = requests.get(species_url, headers=HEADERS)
+            species_response.raise_for_status()
+            species_data = species_response.json()
+
+            # Extract care details from the response
+            if "data" in species_data and species_data["data"]:
+                plant_data = species_data["data"]
+                care_details = {
+                    "light": plant_data.get("growth", {}).get("light"),
+                    "humidity": plant_data.get("growth", {}).get("atmospheric_humidity"),
+                    "temperature": plant_data.get("growth", {}).get("temperature"),
+                    "soil_type": plant_data.get("growth", {}).get("soil_type"),
+                    "ph_maximum": plant_data.get("growth", {}).get("ph_maximum"),
+                    "ph_minimum": plant_data.get("growth", {}).get("ph_minimum"),
+                    "growth_rate": plant_data.get("specifications", {}).get("growth_rate"),
+                    "growth_form": plant_data.get("specifications", {}).get("growth_form"),
+                    "growth_habit": plant_data.get("specifications", {}).get("growth_habit"),
+                    "average_height": plant_data.get("specifications", {}).get("average_height"),
+                    "maximum_height": plant_data.get("specifications", {}).get("maximum_height"),
+                    "description": plant_data.get("description"),
+                    "fruit_or_seed": plant_data.get("fruit_or_seed"),
+                    # New fields for flower
+                    "flower_color": plant_data.get("flower", {}).get("color"),
+                    "flower_conspicuous": plant_data.get("flower", {}).get("conspicuous"),
+                    # New fields for foliage
+                    "foliage_texture": plant_data.get("foliage", {}).get("texture"),
+                    "foliage_color": plant_data.get("foliage", {}).get("color"),
+                    "leaf_retention": plant_data.get("foliage", {}).get("leaf_retention")
+                }
+
+                return care_details  # Return care details dictionary
+
+            else:
+                print("No care details found for the plant.")
+                return None
         else:
-            print(f"No plant found with the name '{plant_name}'.")
+            print("No plant details found for the given name.")
             return None
 
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching plant slug: {e}")
+        print(f"Error fetching plant care details: {e}")
         return None
 
-def fetch_plant_care_details(species_slug):
-    """
-    Fetch complete plant care details for a given species slug from the Trefle API.
-    """
-    url = f"{BASE_URL}/species/{species_slug}"
+def test_fetch_plant_care_details():
+    # Test plant name (you can replace this with any plant name you want to test)
+    plant_name = "coconut"
 
-    try:
-        # Send GET request to fetch the species details
-        response = requests.get(url, headers=HEADERS)
-        response.raise_for_status()
-        data = response.json()
+    # Call the API function
+    care_details = fetch_plant_care_details(plant_name)
 
-        # Check if "data" is present
-        if "data" in data and data["data"]:
-            plant = data["data"]
-
-            # Extract detailed care information from plant data
-            care_details = {
-                "plant_id": plant.get("id", "Unknown"),  # Include plant ID in the result
-
-                # Fruit or Seed Related Fields
-                "conspicuous_fruit": plant.get("fruit_or_seed", {}).get("conspicuous", "Unknown"),
-                "fruit_color": plant.get("fruit_or_seed", {}).get("color", []),
-                "fruit_shape": plant.get("fruit_or_seed", {}).get("shape", "Unknown"),
-                "seed_persistence": plant.get("fruit_or_seed", {}).get("seed_persistence", "Unknown"),
-
-                # Specifications Fields
-                "ligneous_type": plant.get("specifications", {}).get("ligneous_type", "Unknown"),
-                "growth_form": plant.get("specifications", {}).get("growth_form", "Unknown"),
-                "growth_habit": plant.get("specifications", {}).get("growth_habit", "Unknown"),
-                "growth_rate": plant.get("specifications", {}).get("growth_rate", "Unknown"),
-                "average_height": plant.get("specifications", {}).get("average_height", {}),
-                "maximum_height": plant.get("specifications", {}).get("maximum_height", {}),
-                "nitrogen_fixation": plant.get("specifications", {}).get("nitrogen_fixation", "Unknown"),
-                "shape_and_orientation": plant.get("specifications", {}).get("shape_and_orientation", "Unknown"),
-                "toxicity": plant.get("specifications", {}).get("toxicity", "Unknown"),
-
-                # Growth Fields
-                "days_to_harvest": plant.get("growth", {}).get("days_to_harvest", "Unknown"),
-                "growth_description": plant.get("growth", {}).get("description", "Unknown"),
-                "sowing": plant.get("growth", {}).get("sowing", "Unknown"),
-                "ph_maximum": plant.get("growth", {}).get("ph_maximum", "Unknown"),
-                "ph_minimum": plant.get("growth", {}).get("ph_minimum", "Unknown"),
-                "light": plant.get("growth", {}).get("light", "Unknown"),
-                "atmospheric_humidity": plant.get("growth", {}).get("atmospheric_humidity", "Unknown"),
-                "growth_months": plant.get("growth", {}).get("growth_months", []),
-                "bloom_months": plant.get("growth", {}).get("bloom_months", []),
-                "fruit_months": plant.get("growth", {}).get("fruit_months", []),
-                "row_spacing": plant.get("growth", {}).get("row_spacing", {}),
-                "spread": plant.get("growth", {}).get("spread", {}),
-                "minimum_precipitation": plant.get("growth", {}).get("minimum_precipitation", {}),
-                "maximum_precipitation": plant.get("growth", {}).get("maximum_precipitation", {}),
-                "minimum_root_depth": plant.get("growth", {}).get("minimum_root_depth", {}),
-                "minimum_temperature": plant.get("growth", {}).get("minimum_temperature", {}),
-                "maximum_temperature": plant.get("growth", {}).get("maximum_temperature", {}),
-                "soil_nutriments": plant.get("growth", {}).get("soil_nutriments", "Unknown"),
-                "soil_salinity": plant.get("growth", {}).get("soil_salinity", "Unknown"),
-                "soil_texture": plant.get("growth", {}).get("soil_texture", "Unknown"),
-                "soil_humidity": plant.get("growth", {}).get("soil_humidity", "Unknown"),
-            }
-
-            return care_details
-
-        else:
-            print("No data found for the specified species slug.")
-            return None
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching plant details: {e}")
-        return None
-
-def get_plant_details():
-    """
-    Get the plant name from the user, fetch the slug, and then fetch the detailed plant care info.
-    """
-    plant_name = input("Enter the plant name (common name or scientific name): ").strip()
-
-    # Step 1: Fetch the slug for the given plant name
-    species_slug = fetch_plant_slug(plant_name)
-
-    if species_slug:
-        # Step 2: Fetch the detailed care information using the slug
-        care_details = fetch_plant_care_details(species_slug)
-
-        if care_details:
-            # Print out the fetched plant care details
-            print(f"Plant care details for {plant_name}:")
-            print(care_details)
-        else:
-            print("No care details found for this species.")
+    # Check if care details are returned
+    if care_details:
+        print(f"Care details for {plant_name}:")
+        print(f"Light Requirement: {care_details.get('light')}")
+        print(f"pH Range: {care_details.get('ph_range')}")
+        print(f"Temperature Range: {care_details.get('temperature_range')}")
+        print(f"Soil Humidity: {care_details.get('soil_humidity')}")
+        print(f"Description: {care_details.get('description')}")
     else:
-        print("Plant not found. Please check the name and try again.")
+        print(f"No care details found for {plant_name}.")
 
-# Example usage
-get_plant_details()
+# Call the test function
+test_fetch_plant_care_details()
+
+# def fetch_plant_slug(plant_name):
+#     """
+#     Search for a plant by its name (common name or scientific name) and fetch its slug.
+#     """
+#     url = f"{BASE_URL}/species"
+#     params = {"filter[common_name]": plant_name}
+#
+#     try:
+#         # Make API request to search for the plant by its common name
+#         response = requests.get(url, headers=HEADERS, params=params)
+#         response.raise_for_status()
+#         data = response.json()
+#
+#         # Check if there is any data in the response
+#         if "data" in data and data["data"]:
+#             plant = data["data"][0]  # Assuming the first result is the correct one
+#             species_slug = plant.get("slug")
+#             return species_slug
+#         else:
+#             print(f"No plant found with the name '{plant_name}'.")
+#             return None
+#
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error fetching plant slug: {e}")
+#         return None
+#
+# def fetch_plant_care_details(species_slug):
+#     """
+#     Fetch complete plant care details for a given species slug from the Trefle API.
+#     """
+#     url = f"{BASE_URL}/species/{species_slug}"
+#
+#     try:
+#         # Send GET request to fetch the species details
+#         response = requests.get(url, headers=HEADERS)
+#         response.raise_for_status()
+#         data = response.json()
+#
+#         # Check if "data" is present
+#         if "data" in data and data["data"]:
+#             plant = data["data"]
+#
+#             # Extract detailed care information from plant data
+#             care_details = {
+#                 "plant_id": plant.get("id", "Unknown"),  # Include plant ID in the result
+#
+#                 # Fruit or Seed Related Fields
+#                 "conspicuous_fruit": plant.get("fruit_or_seed", {}).get("conspicuous", "Unknown"),
+#                 "fruit_color": plant.get("fruit_or_seed", {}).get("color", []),
+#                 "fruit_shape": plant.get("fruit_or_seed", {}).get("shape", "Unknown"),
+#                 "seed_persistence": plant.get("fruit_or_seed", {}).get("seed_persistence", "Unknown"),
+#
+#                 # Specifications Fields
+#                 "ligneous_type": plant.get("specifications", {}).get("ligneous_type", "Unknown"),
+#                 "growth_form": plant.get("specifications", {}).get("growth_form", "Unknown"),
+#                 "growth_habit": plant.get("specifications", {}).get("growth_habit", "Unknown"),
+#                 "growth_rate": plant.get("specifications", {}).get("growth_rate", "Unknown"),
+#                 "average_height": plant.get("specifications", {}).get("average_height", {}),
+#                 "maximum_height": plant.get("specifications", {}).get("maximum_height", {}),
+#                 "nitrogen_fixation": plant.get("specifications", {}).get("nitrogen_fixation", "Unknown"),
+#                 "shape_and_orientation": plant.get("specifications", {}).get("shape_and_orientation", "Unknown"),
+#                 "toxicity": plant.get("specifications", {}).get("toxicity", "Unknown"),
+#
+#                 # Growth Fields
+#                 "days_to_harvest": plant.get("growth", {}).get("days_to_harvest", "Unknown"),
+#                 "growth_description": plant.get("growth", {}).get("description", "Unknown"),
+#                 "sowing": plant.get("growth", {}).get("sowing", "Unknown"),
+#                 "ph_maximum": plant.get("growth", {}).get("ph_maximum", "Unknown"),
+#                 "ph_minimum": plant.get("growth", {}).get("ph_minimum", "Unknown"),
+#                 "light": plant.get("growth", {}).get("light", "Unknown"),
+#                 "atmospheric_humidity": plant.get("growth", {}).get("atmospheric_humidity", "Unknown"),
+#                 "growth_months": plant.get("growth", {}).get("growth_months", []),
+#                 "bloom_months": plant.get("growth", {}).get("bloom_months", []),
+#                 "fruit_months": plant.get("growth", {}).get("fruit_months", []),
+#                 "row_spacing": plant.get("growth", {}).get("row_spacing", {}),
+#                 "spread": plant.get("growth", {}).get("spread", {}),
+#                 "minimum_precipitation": plant.get("growth", {}).get("minimum_precipitation", {}),
+#                 "maximum_precipitation": plant.get("growth", {}).get("maximum_precipitation", {}),
+#                 "minimum_root_depth": plant.get("growth", {}).get("minimum_root_depth", {}),
+#                 "minimum_temperature": plant.get("growth", {}).get("minimum_temperature", {}),
+#                 "maximum_temperature": plant.get("growth", {}).get("maximum_temperature", {}),
+#                 "soil_nutriments": plant.get("growth", {}).get("soil_nutriments", "Unknown"),
+#                 "soil_salinity": plant.get("growth", {}).get("soil_salinity", "Unknown"),
+#                 "soil_texture": plant.get("growth", {}).get("soil_texture", "Unknown"),
+#                 "soil_humidity": plant.get("growth", {}).get("soil_humidity", "Unknown"),
+#             }
+#
+#             return care_details
+#
+#         else:
+#             print("No data found for the specified species slug.")
+#             return None
+#
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error fetching plant details: {e}")
+#         return None
+#
+# def get_plant_details():
+#     """
+#     Get the plant name from the user, fetch the slug, and then fetch the detailed plant care info.
+#     """
+#     plant_name = input("Enter the plant name (common name or scientific name): ").strip()
+#
+#     # Step 1: Fetch the slug for the given plant name
+#     species_slug = fetch_plant_slug(plant_name)
+#
+#     if species_slug:
+#         # Step 2: Fetch the detailed care information using the slug
+#         care_details = fetch_plant_care_details(species_slug)
+#
+#         if care_details:
+#             # Print out the fetched plant care details
+#             print(f"Plant care details for {plant_name}:")
+#             print(care_details)
+#         else:
+#             print("No care details found for this species.")
+#     else:
+#         print("Plant not found. Please check the name and try again.")
+#
+# # Example usage
+# get_plant_details()
